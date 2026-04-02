@@ -1,120 +1,68 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import repoData from './data/repos.json'
+import { RepoSelector } from './components/RepoSelector'
+import { TabNav } from './components/TabNav'
+import { ArtifactViewer } from './components/ArtifactViewer'
+import { FileActions } from './components/FileActions'
+import { TableOfContents } from './components/TableOfContents'
+import styles from './App.module.css'
+
+type RepoKey = keyof typeof repoData
+type TabKey = 'architecture' | 'claude_md' | 'hooks' | 'skills'
+
+const TAB_LABELS: Record<TabKey, string> = {
+  architecture: 'Architecture',
+  claude_md: 'CLAUDE.md',
+  hooks: 'Hooks',
+  skills: 'Skills',
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [selectedRepo, setSelectedRepo] = useState<RepoKey>('fastapi')
+  const [activeTab, setActiveTab] = useState<TabKey>('architecture')
+
+  const repo = repoData[selectedRepo]
+  const content = repo[activeTab]
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className={styles.app}>
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.wordmark}>eureka</h1>
+          <span className={styles.tagline}>AI-first onboarding</span>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        <RepoSelector
+          repos={Object.entries(repoData).map(([key, val]) => ({
+            key,
+            name: val.repo_name,
+            url: val.repo_url,
+          }))}
+          selected={selectedRepo}
+          onSelect={(key) => setSelectedRepo(key as RepoKey)}
+        />
+      </header>
 
-      <div className="ticks"></div>
+      <TabNav
+        tabs={TAB_LABELS}
+        activeTab={activeTab}
+        onSelect={(tab) => setActiveTab(tab as TabKey)}
+      />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      <div className={styles.layout}>
+        <aside className={styles.sidebar}>
+          <TableOfContents content={content} />
+        </aside>
+        <main className={styles.main}>
+          {activeTab === 'claude_md' && (
+            <FileActions content={content} filename="CLAUDE.md" />
+          )}
+          {activeTab === 'hooks' && (
+            <FileActions content={content} filename="settings.json" />
+          )}
+          <ArtifactViewer content={content} />
+        </main>
+      </div>
+    </div>
   )
 }
 

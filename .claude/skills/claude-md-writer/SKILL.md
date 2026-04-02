@@ -31,19 +31,41 @@ Tell the new engineer exactly where to begin:
 
 Be specific. Give file paths. Explain WHY each file matters, not just that it exists.
 
+### Codebase Navigation
+How to find things in this repo. This is a map — where to look for what:
+- "API route handlers are in `src/routes/` — each file handles one resource"
+- "Tests mirror the source tree: `src/foo/bar.py` → `tests/foo/test_bar.py`"
+- "Shared types are in `src/types/` — always check here before defining new types"
+
+### Key Patterns
+The 3-5 patterns that appear repeatedly throughout the codebase. For each one:
+1. What the pattern is
+2. A specific file where you can see it in practice
+3. Why it exists (the motivation)
+
+Example:
+- "Every API endpoint uses dependency injection via `Depends()` (see `fastapi/routing.py`). Never instantiate services directly — the DI system handles lifecycle and testing."
+
+### Common Tasks
+Step-by-step guidance for the most frequent types of changes:
+- "Adding a new API endpoint: 1) Create route handler in `src/routes/`, 2) Add schema in `src/schemas/`, 3) Register route in `src/app.py`, 4) Add test in `tests/routes/`"
+
 ### Gotchas
 Non-obvious things that will bite a new engineer:
 - "Tests must be run from the repo root, not from `src/` — the fixtures depend on relative paths."
 - "The `internal` package is auto-generated — don't edit files in `src/internal/` directly."
-- "Environment variable `DATABASE_URL` must be set even for unit tests — they hit a real test database."
 
 These must be real, specific gotchas from THIS repo, not generic advice.
 
 ### AI Working Patterns
 **This is Eureka's other signature section.** How to work effectively with AI agents in this specific codebase:
-- "When modifying API endpoints, always update the OpenAPI schema — the types are generated from it, so stale schemas cause cascading type errors."
-- "This repo uses a plugin architecture. When adding new functionality, create a new plugin in `packages/plugin-X/` rather than modifying the core."
-- "Test files mirror source files 1:1 (`src/foo.ts` → `tests/foo.test.ts`). When writing new code, create the test file in the matching location."
+- "When modifying API endpoints, always update the OpenAPI schema — the types are generated from it."
+- "Test files mirror source files 1:1. When writing new code, create the test file in the matching location."
+
+### Anti-Patterns to Avoid
+Things an agent might do that would be wrong for this repo:
+- "Don't add `try/except` blocks in route handlers — the global exception handler handles errors."
+- "Don't create new utility files in `src/utils/` — put helpers next to where they're used."
 
 ### Conventions
 Code style, naming conventions, file organization patterns, PR expectations. Only include conventions that are actually enforced or consistently followed in this repo.
@@ -53,7 +75,7 @@ Code style, naming conventions, file organization patterns, PR expectations. Onl
 - **Specific over generic**. Every line should contain information that is unique to THIS repo.
 - **Actionable over descriptive**. "Run `pytest -x` to stop on first failure" is better than "The project uses pytest for testing."
 - **Test**: If you removed the repo name, could any sentence apply to any repo? If yes, rewrite it or cut it.
-- **Length**: 300-500 lines. Comprehensive but scannable.
+- **Length**: Comprehensive but scannable. Aim for density — every line pulls its weight.
 
 ## Input
 
@@ -62,5 +84,5 @@ You receive the Explorer and Architect outputs from the memory file. Build on th
 ## What NOT to Do
 
 - Do not produce a generic CLAUDE.md that could apply to any Python/TypeScript project.
-- Do not include sections with only generic content — if you can't say something specific about Gotchas, leave the section shorter rather than filling it with platitudes.
+- Do not include sections with only generic content — if you can't say something specific about a section, keep it short rather than filling it with platitudes.
 - Do not describe what CLAUDE.md is or why it exists. Just write the content.

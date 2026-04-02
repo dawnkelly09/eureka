@@ -1,0 +1,86 @@
+.viewer {
+  line-height: 1.7;
+  font-size: 0.9375rem;
+}
+
+.viewer p {
+  margin: 0 0 1rem;
+}
+
+.viewer ul,
+.viewer ol {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+}
+
+.viewer li {
+  margin-bottom: 0.35rem;
+}
+
+.viewer strong {
+  color: #fafafa;
+  font-weight: 600;
+}
+
+.h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fafafa;
+  margin: 0 0 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fafafa;
+  margin: 2rem 0 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #27272a;
+}
+
+.h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #e4e4e7;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.inlineCode {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  font-size: 0.85em;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+  color: #a78bfa;
+}
+
+.codeBlock {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+.codeBlock pre {
+  margin: 0;
+  padding: 1rem;
+}
+
+.codeBlock code {
+  font-size: 0.8125rem;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+  line-height: 1.6;
+  color: #d4d4d8;
+}
+
+.link {
+  color: #818cf8;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
