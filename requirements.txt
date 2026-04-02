@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+langgraph
+langgraph-checkpoint-sqlite
+langsmith
+anthropic
+httpx
+python-dotenv
+aiosqlite
