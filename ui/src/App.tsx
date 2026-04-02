@@ -17,12 +17,26 @@ const TAB_LABELS: Record<TabKey, string> = {
   skills: 'Skills',
 }
 
+function cleanSkillsContent(raw: string): string {
+  return raw
+    .split('\n')
+    .filter((line) => !line.startsWith('=== skill:'))
+    .map((line) => {
+      // Demote H1 → H2, H2 → H3
+      if (line.startsWith('## ')) return '###' + line.slice(2)
+      if (line.startsWith('# ')) return '##' + line.slice(1)
+      return line
+    })
+    .join('\n')
+}
+
 function App() {
   const [selectedRepo, setSelectedRepo] = useState<RepoKey>('fastapi')
   const [activeTab, setActiveTab] = useState<TabKey>('architecture')
 
   const repo = repoData[selectedRepo]
-  const content = repo[activeTab]
+  const rawContent = repo[activeTab]
+  const content = activeTab === 'skills' ? cleanSkillsContent(rawContent) : rawContent
 
   return (
     <div className={styles.app}>
@@ -54,10 +68,25 @@ function App() {
         </aside>
         <main className={styles.main}>
           {activeTab === 'claude_md' && (
-            <FileActions content={content} filename="CLAUDE.md" />
+            <FileActions
+              content={content}
+              filename="CLAUDE.md"
+              hint="Place this file at .claude/CLAUDE.md in your repo root to give Claude Code full context on the codebase."
+            />
           )}
           {activeTab === 'hooks' && (
-            <FileActions content={content} filename="settings.json" />
+            <FileActions
+              content={content}
+              filename="settings.json"
+              hint="Copy the hook snippets below into .claude/settings.json to enable automated quality checks."
+            />
+          )}
+          {activeTab === 'skills' && (
+            <FileActions
+              content={rawContent}
+              filename="skills.md"
+              hint={`Drop this file into a Claude Code session and ask it to install these skills into .claude/skills/${repo.repo_name}/`}
+            />
           )}
           <ArtifactViewer content={content} />
         </main>
