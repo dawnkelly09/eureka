@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+dist/
+audit/*.log
+memory/*.md
+!memory/_template.md
+/tmp/
+.DS_Store
