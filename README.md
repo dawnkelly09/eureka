@@ -72,13 +72,13 @@ curl http://localhost:8000/results/{run_id}
 
 The quality of Eureka's output is driven by Skill files — structured prompts that teach each agent how to produce repo-specific artifacts:
 
-| Agent | Skill File | What It Produces |
-|-------|-----------|-----------------|
-| Explorer | `.claude/skills/explorer/SKILL.md` | Repo structure, stack detection, file summaries |
-| Architect | `.claude/skills/architect/SKILL.md` | Architecture overview with data flow and patterns |
-| CLAUDE.md Writer | `.claude/skills/claude-md-writer/SKILL.md` | Onboarding-focused CLAUDE.md |
-| Hooks Generator | `.claude/skills/hooks-generator/SKILL.md` | Stack-appropriate Claude Code hooks |
-| Skills Writer | `.claude/skills/skills-writer/SKILL.md` | Starter Skills file for the target repo |
+| Agent            | Skill File                                 | What It Produces                                  |
+| ---------------- | ------------------------------------------ | ------------------------------------------------- |
+| Explorer         | `.claude/skills/explorer/SKILL.md`         | Repo structure, stack detection, file summaries   |
+| Architect        | `.claude/skills/architect/SKILL.md`        | Architecture overview with data flow and patterns |
+| CLAUDE.md Writer | `.claude/skills/claude-md-writer/SKILL.md` | Onboarding-focused CLAUDE.md                      |
+| Hooks Generator  | `.claude/skills/hooks-generator/SKILL.md`  | Stack-appropriate Claude Code hooks               |
+| Skills Writer    | `.claude/skills/skills-writer/SKILL.md`    | Starter Skills file for the target repo           |
 
 ## Tech Stack
 
@@ -86,3 +86,5 @@ The quality of Eureka's output is driven by Skill files — structured prompts t
 - **API**: FastAPI
 - **Frontend**: Vite + React + TypeScript
 - **Tracing**: LangSmith (optional)
+
+Note: this project used https://github.com/ashtilawat/minimum-viable-factory created by Gauntlet AI's Ashalesh Tilawat (@ashtilawat) for a Night School session where attendees were invited to take the factory and extend, modify, and make it their own.
