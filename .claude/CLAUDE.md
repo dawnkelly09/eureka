@@ -7,7 +7,7 @@ You are working on Eureka, an AI-first engineer onboarding factory. It takes a G
 - Install: `pip install -r requirements.txt`
 - Run API: `uvicorn orchestrator:app --reload`
 - Test Explorer: `python -m orchestrator.nodes.explorer https://github.com/fastapi/fastapi`
-- Docker: `docker-compose up --build`
+- Run UI: `cd ui && npm install && npm run dev`
 
 ## Architecture
 
