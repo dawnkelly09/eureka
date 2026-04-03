@@ -71,14 +71,14 @@ function App() {
             <FileActions
               content={content}
               filename="CLAUDE.md"
-              hint="Place this file at .claude/CLAUDE.md in your repo root to give Claude Code full context on the codebase."
+              hint="Drop this file into a Claude Code session and ask it to update the .claude/CLAUDE.md in your repo root to give Claude Code extended context on the codebase."
             />
           )}
           {activeTab === 'hooks' && (
             <FileActions
               content={content}
               filename="settings.json"
-              hint="Copy the hook snippets below into .claude/settings.json to enable automated quality checks."
+              hint="Drop this file into a Claude Code session and ask it to update .claude/settings.json to add these hooks to your environment."
             />
           )}
           {activeTab === 'skills' && (
