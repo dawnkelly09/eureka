@@ -16,6 +16,8 @@ SKILLS_DIR = Path(".claude/skills")
 CLONE_DIR = Path("/tmp/eureka-clones")
 
 # API keys
+# ANTHROPIC_API_KEY is no longer used for agent runs (agents use Claude Code CLI).
+# Kept for backward compat / any future direct API usage.
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 

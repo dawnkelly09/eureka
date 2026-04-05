@@ -13,7 +13,7 @@ You are working on Eureka, an AI-first engineer onboarding factory. It takes a G
 
 LangGraph orchestrates a sequential pipeline of 5 agents. Each agent has a Skill file in `.claude/skills/` that defines its behavior. Agents communicate through a shared memory file (`memory/{run_id}.md`) — each agent reads previous outputs and appends its own.
 
-The Explorer node is different from the other four: it runs locally (no Claude Code SDK) to clone and analyze repos. The other four nodes spawn Claude Code sessions via `agent_runner.py`.
+The Explorer node is different from the other four: it runs locally (no Claude Code SDK) to clone and analyze repos. The other four nodes spawn Claude Code CLI sessions via `agent_runner.py` (using `subprocess.run(["claude", ...])` wrapped in `asyncio.to_thread()`). This runs on the operator's Claude Max plan, not API credits. Requires `claude` CLI installed and authenticated.
 
 ## Key Files
 
