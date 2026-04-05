@@ -3,7 +3,7 @@ uvicorn[standard]
 langgraph
 langgraph-checkpoint-sqlite
 langsmith
-anthropic
+claude-agent-sdk
 httpx
 python-dotenv
 aiosqlite

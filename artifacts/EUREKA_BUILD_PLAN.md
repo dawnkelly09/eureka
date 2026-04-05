@@ -164,11 +164,11 @@ The deployed UI will have the FastAPI and Vite outputs pre-loaded as selectable 
 ## Environment Variables
 
 ```
-ANTHROPIC_API_KEY=sk-ant-...
 GITHUB_TOKEN=ghp_...              # For repo access (public repos work without this)
 LANGCHAIN_API_KEY=lsv2_...        # Optional — LangSmith tracing
 LANGCHAIN_PROJECT=eureka
 LANGCHAIN_TRACING_V2=true
+# Note: ANTHROPIC_API_KEY is not needed — agents use claude-agent-sdk with OAuth
 ```
 
 ## What We Are NOT Building in MVP
