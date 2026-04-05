@@ -16,9 +16,8 @@ SKILLS_DIR = Path(".claude/skills")
 CLONE_DIR = Path("/tmp/eureka-clones")
 
 # API keys
-# ANTHROPIC_API_KEY is no longer used for agent runs (agents use Claude Code CLI).
-# Kept for backward compat / any future direct API usage.
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+# ANTHROPIC_API_KEY is not used — agents use claude-agent-sdk with OAuth.
+# agent_runner.py strips this from the environment to prevent auth poisoning.
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 
 # LangSmith (optional)
@@ -28,7 +27,6 @@ LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT", "eureka")
 # Limits
 MAX_FILES_PER_RUN = 50
 MAX_LINES_PER_FILE = 200
-AGENT_TIMEOUT = 1800  # 30 minutes
 
 # Logging
 logger = logging.getLogger("eureka")

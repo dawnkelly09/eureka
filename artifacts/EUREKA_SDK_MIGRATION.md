@@ -123,8 +123,6 @@ not CLI subprocess. We switched to that approach.
 ```python
 """Core agent runner — spawns Claude Code sessions to generate onboarding artifacts."""
 
-import os
-
 from claude_agent_sdk import query as claude_query, ClaudeAgentOptions
 from langsmith import traceable
 
@@ -132,10 +130,6 @@ from orchestrator.config import SKILLS_DIR, MEMORY_DIR, logger
 from orchestrator.state import EurekaState
 from orchestrator.audit import audit_log
 from orchestrator.memory import append_memory
-
-# Strip ANTHROPIC_API_KEY from environment so the SDK uses OAuth (Max plan)
-# auth instead of any API key loaded from .env by python-dotenv.
-os.environ.pop("ANTHROPIC_API_KEY", None)
 
 
 @traceable(run_type="chain", name="run_agent")
@@ -165,9 +159,16 @@ async def run_agent(
 
     audit_log(run_id, f"agent_start:{memory_section}", skill_file)
 
+    import os
+    # Pass a clean env to the SDK without ANTHROPIC_API_KEY so it uses OAuth
+    # (Max plan) auth. This avoids mutating os.environ globally — a real API
+    # key in .env stays available to anything else that needs it.
+    sdk_env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+
     options = ClaudeAgentOptions(
         permission_mode="bypassPermissions",
         allowed_tools=["Read", "Glob", "Grep"],
+        env=sdk_env,
     )
 
     output_parts: list[str] = []
@@ -186,9 +187,10 @@ async def run_agent(
 
 Design decisions:
 
-- **`os.environ.pop("ANTHROPIC_API_KEY", None)`** at module load — the SDK (which bundles its
-  own CLI) still checks for this env var. If python-dotenv loads a placeholder, the SDK fails
-  with an opaque auth error. Stripping it forces OAuth.
+- **`env=sdk_env` on `ClaudeAgentOptions`** — pass a filtered copy of `os.environ` (with
+  `ANTHROPIC_API_KEY` removed) so the SDK uses OAuth. This avoids mutating the global
+  environment — a real API key in `.env` stays available to anything else that needs it.
+  Do NOT use `os.environ.pop()` — that's a global side effect that breaks other consumers.
 
 - **`allowed_tools=["Read", "Glob", "Grep"]`** — Eureka agents only need to read and search.
   They don't need Write, Edit, or Bash. Restricting tools prevents agents from accidentally
@@ -228,7 +230,7 @@ Design decisions:
 
 ## Gotcha: ANTHROPIC_API_KEY Environment Variable Poisoning
 
-This hit us twice — once with subprocess, once with the SDK. Both the CLI and the SDK check for
+This hit us three times during development. Both the CLI and the SDK check for
 `ANTHROPIC_API_KEY` in the environment. If python-dotenv loads a placeholder value (e.g.,
 `sk-ant-` from `.env`), the SDK tries to use it as an API key instead of OAuth, and fails.
 
@@ -236,15 +238,19 @@ This hit us twice — once with subprocess, once with the SDK. Both the CLI and 
 - With subprocess: agents return `"Invalid API key · Fix external API key"` (38 chars) in ~2s
 - With SDK: `Command failed with exit code 1` error
 
-**Fix:** Strip the key from the environment before the SDK loads:
+**Fix:** Use the `env` parameter on `ClaudeAgentOptions` to pass a filtered environment:
 ```python
-os.environ.pop("ANTHROPIC_API_KEY", None)
+import os
+sdk_env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+options = ClaudeAgentOptions(env=sdk_env, ...)
 ```
 
-This is at module level in `agent_runner.py` so it runs once at import time.
+**Why not `os.environ.pop()`?** That mutates the global environment. If someone has a real
+`ANTHROPIC_API_KEY` in `.env` for other purposes (tracing, direct API calls, etc.), popping it
+breaks those consumers. The `env=` parameter scopes the change to the SDK subprocess only.
 
 **Prevention for new projects:** Don't put placeholder API keys in `.env` files. Either use a
-real key or leave the variable unset. The `.env.example` now has comments explaining this.
+real key or leave the variable unset. The `.env.example` now omits `ANTHROPIC_API_KEY` entirely.
 
 ---
 
@@ -304,7 +310,7 @@ This migration applies to any project forked from minimum-viable-factory that st
 1. Upgrade Python to >= 3.10
 2. Replace `anthropic` with `claude-agent-sdk` in requirements.txt
 3. Rewrite the agent runner to use `claude_query()` (see implementation above)
-4. Add `os.environ.pop("ANTHROPIC_API_KEY", None)` before SDK import
+4. Use `ClaudeAgentOptions(env=...)` to pass a filtered env without `ANTHROPIC_API_KEY`
 5. Verify the `run_agent()` interface didn't change so callers are unaffected
 6. Update `.env.example`, README, and project docs
 

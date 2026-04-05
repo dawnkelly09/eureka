@@ -21,7 +21,7 @@ GitHub URL → Explorer → Architect → CLAUDE.md Writer → Hooks Generator �
 
 Each agent has a specialized **Skill file** (in `.claude/skills/`) that defines its behavior and output quality. Agents communicate through a shared memory file (`memory/{run_id}.md`) — each agent reads previous outputs and appends its own.
 
-The **Explorer** runs locally as a Python process to clone and analyze repos (50 files max, 200 lines per file). The other four agents run as Claude Code sessions via the Claude Code CLI, using your Claude Max plan — no API credits needed.
+The **Explorer** runs locally as a Python process to clone and analyze repos (50 files max, 200 lines per file). The other four agents run as Claude Code sessions via the `claude-agent-sdk` Python library, using your Claude Max plan — no API credits needed.
 
 ## Setup
 
@@ -30,16 +30,14 @@ The **Explorer** runs locally as a Python process to clone and analyze repos (50
 git clone https://github.com/dawnkelly09/eureka.git
 cd eureka
 
-# Install dependencies
+# Install dependencies (requires Python >= 3.10)
 pip install -r requirements.txt
-npm install -g @anthropic-ai/claude-code  # Claude Code CLI (powers the four AI agents)
-claude login                               # authenticate with your Claude Max plan
+claude login  # authenticate with your Claude Max plan (one-time setup)
 
 # Configure
 cp .env.example .env
 # Edit .env with your keys:
 #   GITHUB_TOKEN       — required, for cloning repos via the Explorer
-#   ANTHROPIC_API_KEY  — optional, only if using Anthropic API directly
 #   LANGCHAIN_API_KEY  — optional, enables LangSmith tracing
 
 # Run the API

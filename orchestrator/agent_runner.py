@@ -1,13 +1,7 @@
 """Core agent runner — spawns Claude Code sessions to generate onboarding artifacts."""
 
-import os
-
 from claude_agent_sdk import query as claude_query, ClaudeAgentOptions
 from langsmith import traceable
-
-# Strip ANTHROPIC_API_KEY from environment so the SDK uses OAuth (Max plan)
-# auth instead of any API key loaded from .env by python-dotenv.
-os.environ.pop("ANTHROPIC_API_KEY", None)
 
 from orchestrator.config import SKILLS_DIR, MEMORY_DIR, logger
 from orchestrator.state import EurekaState
@@ -48,9 +42,16 @@ async def run_agent(
 
     audit_log(run_id, f"agent_start:{memory_section}", skill_file)
 
+    import os
+    # Pass a clean env to the SDK without ANTHROPIC_API_KEY so it uses OAuth
+    # (Max plan) auth. This avoids mutating os.environ globally — a real API
+    # key in .env stays available to anything else that needs it.
+    sdk_env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+
     options = ClaudeAgentOptions(
         permission_mode="bypassPermissions",
         allowed_tools=["Read", "Glob", "Grep"],
+        env=sdk_env,
     )
 
     output_parts: list[str] = []
