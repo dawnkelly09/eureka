@@ -42,7 +42,7 @@ Produce your output as a series of skill files, each clearly delimited. Use this
 ---
 name: INSERT_SKILL_NAME
 description: INSERT_SKILL_DESCRIPTION
---- 
+---
 
 === skill: INSERT_SKILL_NAME ===
 

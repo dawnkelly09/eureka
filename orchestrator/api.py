@@ -1,6 +1,9 @@
 """FastAPI endpoints for Eureka."""
 
+import asyncio
 import json
+import os
+import tempfile
 import uuid
 from pathlib import Path
 from typing import Optional
@@ -10,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from orchestrator.config import logger
+from orchestrator.ghost_rag import destroy_ghost_rag
 from orchestrator.memory import init_memory
 from orchestrator.state import EurekaState
 from orchestrator.graph import build_graph
@@ -36,9 +40,20 @@ def _load_runs() -> dict[str, dict]:
     return {}
 
 
-def _save_runs() -> None:
-    _RUNS_FILE.parent.mkdir(exist_ok=True)
-    _RUNS_FILE.write_text(json.dumps(_runs, indent=2))
+_runs_lock = asyncio.Lock()
+
+
+async def _save_runs() -> None:
+    async with _runs_lock:
+        _RUNS_FILE.parent.mkdir(exist_ok=True)
+        fd, tmp = tempfile.mkstemp(dir=_RUNS_FILE.parent, suffix=".tmp")
+        os.close(fd)
+        try:
+            Path(tmp).write_text(json.dumps(_runs, indent=2))
+            Path(tmp).replace(_RUNS_FILE)
+        except BaseException:
+            Path(tmp).unlink(missing_ok=True)
+            raise
 
 
 _runs: dict[str, dict] = _load_runs()
@@ -105,7 +120,7 @@ async def _run_pipeline(run_id: str, repo_url: str):
             "skills": result.get("skills_file"),
             "error": None,
         }
-        _save_runs()
+        await _save_runs()
         logger.info(f"Pipeline completed for {run_id}")
     except Exception as e:
         logger.error(f"Pipeline failed for {run_id}: {e}")
@@ -114,7 +129,9 @@ async def _run_pipeline(run_id: str, repo_url: str):
             "repo_url": repo_url,
             "error": str(e),
         }
-        _save_runs()
+        await _save_runs()
+    finally:
+        destroy_ghost_rag(run_id)
 
 
 @app.post("/analyze", response_model=AnalyzeResponse)
@@ -123,7 +140,7 @@ async def analyze(request: AnalyzeRequest, background_tasks: BackgroundTasks):
     run_id = str(uuid.uuid4())[:8]
     init_memory(run_id, request.repo_url)
     _runs[run_id] = {"status": "running", "repo_url": request.repo_url}
-    _save_runs()
+    await _save_runs()
     background_tasks.add_task(_run_pipeline, run_id, request.repo_url)
     return AnalyzeResponse(run_id=run_id, status="running")
 

@@ -5,7 +5,7 @@ ephemeral vector store. Each run gets its own server instance scoped
 to its ChromaDB collection.
 """
 
-from typing import Annotated
+from typing import Annotated, Optional
 
 from claude_agent_sdk import tool, create_sdk_mcp_server
 from claude_agent_sdk.types import McpSdkServerConfig
@@ -23,12 +23,12 @@ def create_ghost_rag_server(run_id: str) -> McpSdkServerConfig:
         "'route registration'). Returns the most relevant files with their full content.",
         {
             "query": Annotated[str, "What to search for — describe the concept or functionality"],
-            "n_results": Annotated[int, "Number of results to return (default 5, max 20)"],
+            "n_results": Annotated[Optional[int], "Number of results to return (default 5, max 20)"],
         },
     )
     async def search_repo(args: dict) -> dict:
         query = args["query"]
-        n_results = min(args.get("n_results", 5), 20)
+        n_results = min(args.get("n_results") or 5, 20)
 
         results = query_ghost_rag(run_id, query, n_results=n_results)
 

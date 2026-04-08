@@ -116,12 +116,6 @@ async def run_agent(
 
     output = "\n".join(output_parts)
 
-    # Strip preamble — anything before the first markdown heading
-    import re
-    heading_match = re.search(r"^(#{1,6}\s)", output, flags=re.MULTILINE)
-    if heading_match:
-        output = output[heading_match.start():]
-
     logger.info(f"[{run_id}] Final output: {len(output)} chars, {len(output_parts)} parts")
 
     append_memory(run_id, memory_section, output)

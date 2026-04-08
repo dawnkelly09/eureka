@@ -1,4 +1,3 @@
-```
 ---
 name: skill-name
 description: What this skill does and when to use it.
@@ -17,5 +16,3 @@ When to use this skill.
 ## Example
 
 ## References
-
-```

@@ -42,7 +42,7 @@ Agents communicate through a shared markdown file at `memory/{run_id}.md`. The f
 
 ### API
 
-`orchestrator/api.py` — FastAPI app. Runs pipeline in background tasks. Results stored in an in-memory dict (`_runs`), not persisted across restarts. Endpoints: `POST /analyze`, `GET /results/{run_id}`, `GET /repos` (completed runs), `GET /health`.
+`orchestrator/api.py` — FastAPI app. Runs pipeline in background tasks. Results tracked in an in-memory dict (`_runs`) and persisted to `memory/_runs.json`, so they survive restarts. Endpoints: `POST /analyze`, `GET /results/{run_id}`, `GET /repos` (completed runs), `GET /health`.
 
 ### UI
 

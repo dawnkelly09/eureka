@@ -45,29 +45,23 @@ function App() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchRepos = () => {
-      fetch('/repos')
-        .then((res) => {
-          if (!res.ok) throw new Error(`API returned ${res.status}`)
-          return res.json()
-        })
-        .then((data: Record<string, RepoData>) => {
-          setRepos(data)
-          const keys = Object.keys(data)
-          if (keys.length > 0 && !selectedRepo) {
-            setSelectedRepo(keys[0])
-          }
-          setLoading(false)
-        })
-        .catch((err) => {
-          setError(err.message)
-          setLoading(false)
-        })
-    }
-
-    fetchRepos()
-    const interval = setInterval(fetchRepos, 5000)
-    return () => clearInterval(interval)
+    fetch('/repos')
+      .then((res) => {
+        if (!res.ok) throw new Error(`API returned ${res.status}`)
+        return res.json()
+      })
+      .then((data: Record<string, RepoData>) => {
+        setRepos(data)
+        const keys = Object.keys(data)
+        if (keys.length > 0) {
+          setSelectedRepo((prev) => prev || keys[0])
+        }
+        setLoading(false)
+      })
+      .catch((err) => {
+        setError(err.message)
+        setLoading(false)
+      })
   }, [])
 
   if (loading) {

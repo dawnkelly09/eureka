@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import re
 
 from gitingest import ingest, ingest_async
 from langsmith import traceable
