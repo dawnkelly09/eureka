@@ -10,3 +10,4 @@ memory/*.md
 !memory/_template.md
 /tmp/
 .DS_Store
+_runs.json

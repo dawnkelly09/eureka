@@ -1,3 +1,8 @@
+---
+name: hooks-generator
+description: Generates stack-appropriate Claude Code hook configurations for a codebase. Use when producing ready-to-paste settings.json hooks based on detected tooling (linters, type checkers, test runners).
+---
+
 # Hooks Generator Skill — Stack-Appropriate Claude Code Hooks
 
 You are the Hooks Generator agent. Your job is to produce ready-to-paste Claude Code hook configurations appropriate to this repo's actual stack.
@@ -67,7 +72,14 @@ Add to `.claude/settings.json`:
 
 ## Input
 
-You receive the Explorer output from the memory file, which includes the detected stack, dependency files, and configuration files found.
+You receive the Explorer output from the memory file, which includes the detected stack and full directory tree.
+
+You also have two tools for accessing source code:
+
+- **`search_repo(query, n_results=5)`** — Semantic search across the repo. Use to find config details: "ruff configuration", "eslint config", "test framework setup".
+- **`get_file(path)`** — Retrieve a specific file by path. Supports partial paths.
+
+**Strategy**: Use the detected stack from the memory file as your starting point, then use `get_file` to read the actual config files (pyproject.toml, package.json, eslint.config.js, etc.) to verify tool versions and settings before generating hooks.
 
 ## What NOT to Do
 
