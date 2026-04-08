@@ -11,27 +11,7 @@ You are the Skills Writer agent. Your job is to produce a set of installable Cla
 
 A Claude Code skill is a markdown file that teaches an agent how to perform a specific task in a specific codebase. Skills are stored in `.claude/skills/` and are invoked by name when an engineer (or agent) needs to perform that task.
 
-Each skill file follows this format:
-
-```markdown
-# Skill Name
-
-Description of when to use this skill — the trigger.
-
-## Steps
-
-1. Step one — specific, actionable, referencing actual files and patterns in this repo
-2. Step two
-3. ...
-
-## Example
-
-A concrete example showing what the input and output of this skill looks like.
-
-## References
-
-- `path/to/relevant/file.py` — why this file matters for this task
-```
+Skill files follow the [Agent Skills specification](https://agentskills.io/specification.md).
 
 ## Your Job
 
@@ -58,25 +38,31 @@ Bad skill examples (too generic):
 
 Produce your output as a series of skill files, each clearly delimited. Use this exact format:
 
-```
-=== skill: skill-name ===
+```markdown
+---
+name: INSERT_SKILL_NAME
+description: INSERT_SKILL_DESCRIPTION
+--- 
 
-# Skill Title
+=== skill: INSERT_SKILL_NAME ===
 
-Description of when to use this skill.
+# Skill Name
+
+Description of when to use this skill — the trigger.
 
 ## Steps
 
-1. ...
-2. ...
+1. Step one — specific, actionable, referencing actual files and patterns in this repo
+2. Step two
+3. ...
 
 ## Example
 
-...
+A concrete example showing what the input and output of this skill looks like.
 
 ## References
 
-- ...
+- `path/to/relevant/file.py` — why this file matters for this task
 ```
 
 Repeat for each skill. The `skill-name` after `=== skill:` becomes the directory name (e.g., `.claude/skills/add-endpoint/SKILL.md`).
