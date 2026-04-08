@@ -1,13 +1,15 @@
 """FastAPI endpoints for Eureka."""
 
+import json
 import uuid
+from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from orchestrator.config import MEMORY_DIR, logger
+from orchestrator.config import logger
 from orchestrator.memory import init_memory
 from orchestrator.state import EurekaState
 from orchestrator.graph import build_graph
@@ -21,8 +23,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory store for run results
-_runs: dict[str, dict] = {}
+# Run results — persisted to disk so --reload doesn't lose them
+_RUNS_FILE = Path("memory/_runs.json")
+
+
+def _load_runs() -> dict[str, dict]:
+    if _RUNS_FILE.exists():
+        try:
+            return json.loads(_RUNS_FILE.read_text())
+        except (json.JSONDecodeError, OSError):
+            return {}
+    return {}
+
+
+def _save_runs() -> None:
+    _RUNS_FILE.parent.mkdir(exist_ok=True)
+    _RUNS_FILE.write_text(json.dumps(_runs, indent=2))
+
+
+_runs: dict[str, dict] = _load_runs()
 
 
 class AnalyzeRequest(BaseModel):
@@ -42,8 +61,17 @@ class ResultsResponse(BaseModel):
     architecture: Optional[str] = None
     claude_md: Optional[str] = None
     hooks: Optional[str] = None
-    skills_file: Optional[str] = None
+    skills: Optional[str] = None
     error: Optional[str] = None
+
+
+class RepoResponse(BaseModel):
+    repo_url: str
+    repo_name: str
+    architecture: str
+    claude_md: str
+    hooks: str
+    skills: str
 
 
 async def _run_pipeline(run_id: str, repo_url: str):
@@ -74,9 +102,10 @@ async def _run_pipeline(run_id: str, repo_url: str):
             "architecture": result.get("architecture_overview"),
             "claude_md": result.get("claude_md"),
             "hooks": result.get("hooks"),
-            "skills_file": result.get("skills_file"),
+            "skills": result.get("skills_file"),
             "error": None,
         }
+        _save_runs()
         logger.info(f"Pipeline completed for {run_id}")
     except Exception as e:
         logger.error(f"Pipeline failed for {run_id}: {e}")
@@ -85,6 +114,7 @@ async def _run_pipeline(run_id: str, repo_url: str):
             "repo_url": repo_url,
             "error": str(e),
         }
+        _save_runs()
 
 
 @app.post("/analyze", response_model=AnalyzeResponse)
@@ -93,6 +123,7 @@ async def analyze(request: AnalyzeRequest, background_tasks: BackgroundTasks):
     run_id = str(uuid.uuid4())[:8]
     init_memory(run_id, request.repo_url)
     _runs[run_id] = {"status": "running", "repo_url": request.repo_url}
+    _save_runs()
     background_tasks.add_task(_run_pipeline, run_id, request.repo_url)
     return AnalyzeResponse(run_id=run_id, status="running")
 
@@ -111,9 +142,30 @@ async def get_results(run_id: str):
         architecture=run.get("architecture"),
         claude_md=run.get("claude_md"),
         hooks=run.get("hooks"),
-        skills_file=run.get("skills_file"),
+        skills=run.get("skills"),
         error=run.get("error"),
     )
+
+
+@app.get("/repos")
+async def list_repos() -> dict[str, RepoResponse]:
+    """Return all completed runs keyed by repo name (latest run wins)."""
+    repos: dict[str, RepoResponse] = {}
+    for run in _runs.values():
+        if run.get("status") != "completed":
+            continue
+        name = run.get("repo_name", "")
+        if not name:
+            continue
+        repos[name] = RepoResponse(
+            repo_url=run.get("repo_url", ""),
+            repo_name=name,
+            architecture=run.get("architecture", ""),
+            claude_md=run.get("claude_md", ""),
+            hooks=run.get("hooks", ""),
+            skills=run.get("skills", ""),
+        )
+    return repos
 
 
 @app.get("/health")

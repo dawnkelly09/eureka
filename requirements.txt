@@ -7,3 +7,5 @@ claude-agent-sdk
 httpx
 python-dotenv
 aiosqlite
+gitingest
+chromadb
