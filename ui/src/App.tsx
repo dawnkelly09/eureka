@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { supabase } from './lib/supabase'
 import { RepoSelector } from './components/RepoSelector'
 import { TabNav } from './components/TabNav'
 import { ArtifactViewer } from './components/ArtifactViewer'
@@ -45,20 +46,25 @@ function App() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/repos')
-      .then((res) => {
-        if (!res.ok) throw new Error(`API returned ${res.status}`)
-        return res.json()
-      })
-      .then((data: Record<string, RepoData>) => {
-        setRepos(data)
-        const keys = Object.keys(data)
+    supabase
+      .from('runs')
+      .select('repo_url, repo_name, architecture, claude_md, hooks, skills')
+      .eq('status', 'completed')
+      .not('repo_name', 'is', null)
+      .then(({ data, error: err }) => {
+        if (err) throw new Error(err.message)
+        const byName: Record<string, RepoData> = {}
+        for (const row of data ?? []) {
+          byName[row.repo_name] = row as RepoData
+        }
+        setRepos(byName)
+        const keys = Object.keys(byName)
         if (keys.length > 0) {
           setSelectedRepo((prev) => prev || keys[0])
         }
         setLoading(false)
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         setError(err.message)
         setLoading(false)
       })

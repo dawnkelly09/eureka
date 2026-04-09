@@ -18,6 +18,10 @@ SKILLS_DIR = Path(".claude/skills")
 # agent_runner.py strips this from the environment to prevent auth poisoning.
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 
+# Supabase
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+
 # LangSmith (optional)
 LANGCHAIN_API_KEY = os.getenv("LANGCHAIN_API_KEY", "")
 LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT", "eureka")
