@@ -46,28 +46,37 @@ function App() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    supabase
-      .from('runs')
-      .select('repo_url, repo_name, architecture, claude_md, hooks, skills')
-      .eq('status', 'completed')
-      .not('repo_name', 'is', null)
-      .then(({ data, error: err }) => {
+    async function fetchRepos() {
+      try {
+        const { data, error: err } = await supabase
+          .from('runs')
+          .select('repo_url, repo_name, architecture, claude_md, hooks, skills')
+          .eq('status', 'completed')
+          .not('repo_name', 'is', null)
         if (err) throw new Error(err.message)
         const byName: Record<string, RepoData> = {}
         for (const row of data ?? []) {
-          byName[row.repo_name] = row as RepoData
+          byName[row.repo_name] = {
+            repo_url: row.repo_url ?? '',
+            repo_name: row.repo_name,
+            architecture: row.architecture ?? '',
+            claude_md: row.claude_md ?? '',
+            hooks: row.hooks ?? '',
+            skills: row.skills ?? '',
+          }
         }
         setRepos(byName)
         const keys = Object.keys(byName)
         if (keys.length > 0) {
           setSelectedRepo((prev) => prev || keys[0])
         }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err))
+      } finally {
         setLoading(false)
-      })
-      .catch((err: Error) => {
-        setError(err.message)
-        setLoading(false)
-      })
+      }
+    }
+    fetchRepos()
   }, [])
 
   if (loading) {

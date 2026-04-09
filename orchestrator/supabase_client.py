@@ -16,5 +16,8 @@ def upsert_run(run_id: str, data: dict) -> None:
     client = get_supabase()
     if client is None:
         return
-    row = {"id": run_id, **data}
-    client.table("runs").upsert(row).execute()
+    try:
+        row = {"id": run_id, **data}
+        client.table("runs").upsert(row).execute()
+    except Exception as e:
+        logger.error(f"Supabase upsert failed for run {run_id}: {e}")
