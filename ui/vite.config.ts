@@ -6,7 +6,6 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/repos': 'http://localhost:8000',
       '/analyze': 'http://localhost:8000',
       '/results': 'http://localhost:8000',
       '/health': 'http://localhost:8000',

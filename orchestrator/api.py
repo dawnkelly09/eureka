@@ -17,6 +17,7 @@ from orchestrator.ghost_rag import destroy_ghost_rag
 from orchestrator.memory import init_memory
 from orchestrator.state import EurekaState
 from orchestrator.graph import build_graph
+from orchestrator.supabase_client import upsert_run
 
 app = FastAPI(title="Eureka", description="AI-first engineer onboarding factory")
 
@@ -121,6 +122,7 @@ async def _run_pipeline(run_id: str, repo_url: str):
             "error": None,
         }
         await _save_runs()
+        upsert_run(run_id, _runs[run_id])
         logger.info(f"Pipeline completed for {run_id}")
     except Exception as e:
         logger.error(f"Pipeline failed for {run_id}: {e}")
@@ -130,6 +132,7 @@ async def _run_pipeline(run_id: str, repo_url: str):
             "error": str(e),
         }
         await _save_runs()
+        upsert_run(run_id, _runs[run_id])
     finally:
         destroy_ghost_rag(run_id)
 
@@ -141,6 +144,7 @@ async def analyze(request: AnalyzeRequest, background_tasks: BackgroundTasks):
     init_memory(run_id, request.repo_url)
     _runs[run_id] = {"status": "running", "repo_url": request.repo_url}
     await _save_runs()
+    upsert_run(run_id, _runs[run_id])
     background_tasks.add_task(_run_pipeline, run_id, request.repo_url)
     return AnalyzeResponse(run_id=run_id, status="running")
 
