@@ -1,4 +1,8 @@
-# Eureka
+🚨 This repo will be archived publicly as a snapshot of how easy it is to have your pipeline run into the ground if you don't have a rigorous framework around validation that goes beyond testing. The pattern here is an token burning furnance. Observe and then walk away slowly. 🚨
+
+I cloned Eureka from this point and started building on top here: [https://github.com/dawnkelly09/BYTEBEAST-ARENA]
+
+## Eureka
 
 POC implementation of an AI-first engineer onboarding factory. Repo in, onboarding package out.
 
